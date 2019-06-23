@@ -4,14 +4,16 @@ import cv2
 import numpy as np
 import pipeline
 import monitoring
+import constants
 
 # Constants
-FPS = 16    # frames per second
-UPS = 2     # units per segment
-SPF = 32    # segments per file
+FPS = constants.FPS
+UPS = constants.UPS
+SPF = constants.SPF
 
 # Remove previous videos
 os.system("rm videos/*")
+os.system("rm compressed/*")
 
 # Remove previous out
 os.system("rm -rf Anomaly-Detection/out/*")
@@ -36,7 +38,7 @@ newpid = 0
 
 outpid = os.fork()
 if outpid == 0:
-    monitoring.run(global_path)
+    monitoring.run(global_path, frame_width, frame_height)
     os._exit(0)
 
 # Prediction
@@ -63,12 +65,18 @@ def parent():
         ret, frame = cap.read()
         
         # Write the frame
-        if ret == True: 
-            out.write(frame)
-            frames_cnt = frames_cnt + 1
-        else:
+        if ret != True:
             os._exit(0)
-            
+        
+        cv2.imshow('original', frame)
+
+        # Press Q on keyboard to  exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+        out.write(frame)
+        frames_cnt = frames_cnt + 1
+    
         if can_break == 0:
             childProcExitInfo = os.waitpid(newpid, os.WNOHANG)
             if childProcExitInfo[0] == newpid:

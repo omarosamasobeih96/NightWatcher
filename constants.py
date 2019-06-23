@@ -1,0 +1,23 @@
+FPS = 16    # frames per second
+UPS = 2     # units per segment
+SPF = 32    # segments per file
+
+FRAME_WIDTH = 640
+FRAME_LENGTH = 480
+
+THRESHOLD = 0.5 # anomaly threshold
+
+MARGIN_H_P = 45
+MARGIN_W_P = 5
+MARGIN_W = 5
+MARGIN_H = 25
+FONT_THICKNESS = 2
+FONT_SCALE = 1
+FONT_THICKNESS_P = 1
+FONT_SCALE_P = 0.6
+NORMAL_COLOR = (255, 255, 255)
+ANOMALY_COLOR = (0, 0, 255)
+NORMAL_TEXT = "Normal"
+ANOMALY_TEXT = "Anomaly"
+
+ACCELERATING_MONITORING_FACTOR = 1 / (3 * FPS)
