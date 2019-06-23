@@ -59,7 +59,7 @@ def run(path, frame_width, frame_height):
 
         cur_path_out_0 = calc_prediction_path(path_out, cur, 0)
         while os.path.isfile(cur_path_out_0) == 0:
-            time.sleep(4)
+            time.sleep(0)
 
         cap = read_video(path_vid + str(cur) + ".mp4")
         
@@ -144,8 +144,6 @@ def run(path, frame_width, frame_height):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 lets_exit = 1
                 break
-
-            #time.sleep(1/(constants.ACCELERATING_MONITORING_FACTOR*FPS))
 
             cnt_frm += 1
             if cnt_frm % (FPS * UPS) == 0:
