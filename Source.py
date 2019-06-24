@@ -47,7 +47,7 @@ os.system("rm compressed/*")
 os.system("rm -rf Anomaly-Detection/out/*")
 
 # Create a VideoCapture object
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
 
 # Check if camera opened successfully
 if (cap.isOpened() == False): 
@@ -129,8 +129,19 @@ while is_running:
         is_running = False
 
 
-os.system("pkill -9 python")
+cv2.destroyAllWindows()
+os.system("kill -9 " + str(outpid))
+cap.release()
+quit()
 
-
-
-
+"""
+killing_pid = os.fork()
+if killing_pid == 0:
+    time.sleep(5)
+    #os.system("kill -9 " + str(os.getppid()))
+    os.system("kill -9 " + str(outpid))
+    #os.system("kill -9 " + str(gui_pid))
+    os._exit(0)
+else:
+    cap.release()
+"""
