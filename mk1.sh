@@ -1,1 +1,1 @@
-mkdir -p Anomaly-Detection/C3D_Features_Avg/video15612803942
+mkdir -p Anomaly-Detection/C3D_Features_Avg/video15613684221

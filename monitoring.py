@@ -55,11 +55,17 @@ def run(path, frame_width, frame_height):
     lets_exit = 0
     lst_clc = 0
 
-    while lets_exit == 0:
+    while True:
+
+        cur_time = time.time()
 
         cur_path_out_0 = calc_prediction_path(path_out, cur, 0)
         while os.path.isfile(cur_path_out_0) == 0:
-            time.sleep(0)
+            if(time.time() - cur_time > constants.TIME_OUT_PERIOD):
+                lets_exit = True
+
+        if lets_exit == 1:
+            break
 
         cap = read_video(path_vid + str(cur) + ".mp4")
         
@@ -141,9 +147,7 @@ def run(path, frame_width, frame_height):
 
             lst_clc = time.time()
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                lets_exit = 1
-                break
+            cv2.waitKey(1)
 
             cnt_frm += 1
             if cnt_frm % (FPS * UPS) == 0:
@@ -151,7 +155,3 @@ def run(path, frame_width, frame_height):
 
 
         cur += 1
-
-    out.release()
-
-    cv2.destroyAllWindows()

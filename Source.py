@@ -5,6 +5,34 @@ import numpy as np
 import pipeline
 import monitoring
 import constants
+import GUI
+import signal
+
+is_running = False
+
+def isr(signum, frame):
+    global is_running
+    if is_running == True:
+        is_running = False
+    else:
+        is_running = True
+
+    
+
+signal.signal(signal.SIGALRM, isr)
+
+gui_pid = os.fork()
+if gui_pid == 0:
+    GUI.run()
+    is_running = False
+    os._exit(0)
+else:
+    while is_running == False:
+        childProcExitInfo = os.waitpid(gui_pid, os.WNOHANG)
+        if childProcExitInfo[0] == gui_pid:
+            quit()
+    
+
 
 # Constants
 FPS = constants.FPS
@@ -86,7 +114,7 @@ def parent():
     id += 1
     out.release()
 
-while True:
+while is_running:
     newpid = os.fork()
     if newpid == 0:
         child()
@@ -95,9 +123,14 @@ while True:
         parent()
     childProcExitInfo = os.waitpid(outpid, os.WNOHANG)
     if childProcExitInfo[0] == outpid:
-        break
+        is_running = False
+    childProcExitInfo = os.waitpid(gui_pid, os.WNOHANG)
+    if childProcExitInfo[0] == gui_pid:
+        is_running = False
 
-cap.release()
 
-# Closes all the frames
-cv2.destroyAllWindows()
+os.system("pkill -9 python")
+
+
+
+
