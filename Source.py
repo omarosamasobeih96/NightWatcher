@@ -114,6 +114,9 @@ def parent():
     id += 1
     out.release()
 
+gui_running = True
+out_running = True
+
 while is_running:
     newpid = os.fork()
     if newpid == 0:
@@ -124,13 +127,29 @@ while is_running:
     childProcExitInfo = os.waitpid(outpid, os.WNOHANG)
     if childProcExitInfo[0] == outpid:
         is_running = False
+        out_running = False
     childProcExitInfo = os.waitpid(gui_pid, os.WNOHANG)
     if childProcExitInfo[0] == gui_pid:
         is_running = False
+        gui_running = False
 
 
 cv2.destroyAllWindows()
-os.system("kill -9 " + str(outpid))
+if out_running:
+    os.kill(outpid, signal.SIGALRM)
+if gui_running:
+    os.kill(gui_pid, signal.SIGALRM)
+while True:
+    if out_running:
+        childProcExitInfo = os.waitpid(outpid, os.WNOHANG)
+        if childProcExitInfo[0] == outpid:
+            out_running = False
+    if gui_running:
+        childProcExitInfo = os.waitpid(gui_pid, os.WNOHANG)
+        if childProcExitInfo[0] == gui_pid:
+            gui_running = False
+    if gui_running == 0 and out_running == 0:
+        break
 cap.release()
 quit()
 

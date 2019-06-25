@@ -3,7 +3,7 @@ UPS = 2     # units per segment
 SPF = 32    # segments per file
 
 FRAME_WIDTH = 640
-FRAME_LENGTH = 480
+FRAME_HEIGHT = 480
 
 THRESHOLD = 0.5 # anomaly threshold
 
@@ -22,4 +22,5 @@ ANOMALY_TEXT = "Anomaly"
 
 ACCELERATING_MONITORING_FACTOR = 0
 
-TIME_OUT_PERIOD = 600
+TIME_OUT_PERIOD = 5
+FIRST_TIME_OUT = 200

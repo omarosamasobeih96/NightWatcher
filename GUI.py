@@ -4,6 +4,11 @@ import signal
 
 is_running = False
 
+
+def isr(signum, frame):
+    quit()
+
+
 def start():
     global is_running
     if is_running == 0:
@@ -16,6 +21,7 @@ def stop():
         quit()
 
 def run():
+    signal.signal(signal.SIGALRM, isr)
     root = tk.Tk()
     root.title("Night Watcher")
     logo = tk.PhotoImage(file="resources/logo.png")

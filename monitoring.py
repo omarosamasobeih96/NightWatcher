@@ -1,7 +1,9 @@
 import os
 import cv2
 import time
+import signal
 import constants
+import notify_user
 
 # Constants
 FPS = constants.FPS
@@ -35,10 +37,23 @@ def check_prediction_files_exist(path, cur, files_cnt):
             return 0
     return 1
 
+out = cv2.VideoWriter("compressed/video.mp4",cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (constants.FRAME_WIDTH,constants.FRAME_HEIGHT))
+
+
+lets_exit = 0
+
+def isr(signum, frame):
+    global lets_exit
+    notify_user.notify("Alarm", "system stopped working")
+    out.release()
+    lets_exit = 1
 
 
 def run(path, frame_width, frame_height):
-
+    global out, lets_exit
+    notify_user.notify("System started", "the watch began")
+    signal.signal(signal.SIGALRM, isr)
+    out.release()
     """
     while True:
         time.sleep(10)
@@ -52,19 +67,25 @@ def run(path, frame_width, frame_height):
 
     
     cur = 1
-    lets_exit = 0
     lst_clc = 0
 
     while True:
 
         cur_time = time.time()
 
+        timout = constants.FIRST_TIME_OUT
+
+        if cur > 1:
+            timout = constants.TIME_OUT_PERIOD
+
         cur_path_out_0 = calc_prediction_path(path_out, cur, 0)
         while os.path.isfile(cur_path_out_0) == 0:
-            if(time.time() - cur_time > constants.TIME_OUT_PERIOD):
+            if lets_exit == True or (time.time() - cur_time > timout):
                 lets_exit = True
+                break
 
         if lets_exit == 1:
+            out.release()
             break
 
         cap = read_video(path_vid + str(cur) + ".mp4")
@@ -88,8 +109,9 @@ def run(path, frame_width, frame_height):
         prv_seg = -1
         all_seg = len(is_anomaly)         
         propis = 0
+        cur_anom = 0
 
-        while(cap.isOpened()):
+        while lets_exit == 0 and cap.isOpened():
             ret, frame = cap.read()
 
             if ret == False:
@@ -120,7 +142,14 @@ def run(path, frame_width, frame_height):
                     propis = "Prob :  " + str(int(100 * predictions[cnt_seg])) + "%"
 
             if is_anomaly[cnt_seg]:
-                out.write(frame)
+                if cur_anom == 0:
+                    cur_anom = 1
+                    notify_user.notify("Alarm", "anomaly is detected")
+                if lets_exit == 0:
+                    out.write(frame)
+            else:
+                cur_anom = 0
+                
 
             cv2.putText(img = frame, 
                 text = prnted,
@@ -153,6 +182,8 @@ def run(path, frame_width, frame_height):
             if cnt_frm % (FPS * UPS) == 0:
                 cnt_seg += 1
 
+
+        cap.release()
 
         cur += 1
     
