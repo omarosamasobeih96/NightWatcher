@@ -153,7 +153,10 @@ def parent():
                 childProcExitInfo = os.waitpid(newpid, os.WNOHANG)
                 if childProcExitInfo[0] == newpid:
                     can_break = 1
-
+        else:
+            if source_mode == False:
+                is_running = False
+                break
 
     id += 1
     out.release()
