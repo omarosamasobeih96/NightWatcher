@@ -32,22 +32,30 @@ def read_predictions(path, cur, files_cnt):
 def check_prediction_files_exist(path, cur, files_cnt):
     for i in range (0, files_cnt):
         cur_path_out = calc_prediction_path(path, cur, i)
+        i = 0
+        MAX_TRIALS = 50
+        while i in range(0, MAX_TRIALS):
+            if os.path.isfile(cur_path_out) == 0:
+                print("test number " + str(i))
+                time.sleep(5)
+            else:
+                break
         if os.path.isfile(cur_path_out) == 0:
-            print("error loading prediction files")
             return 0
     return 1
 
 out = cv2.VideoWriter("compressed/video.mp4",cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (constants.FRAME_WIDTH,constants.FRAME_HEIGHT))
 
 
-lets_exit = 0
+lets_exit = False
 frame_cnt_all = 0
 
 def isr(signum, frame):
     global lets_exit
     notify_user.notify("System Stopped", "my watch has ended")
     out.release()
-    lets_exit = 1
+    print("system carried away to stop")
+    lets_exit = True
 
 
 def run(path, frame_width, frame_height):
@@ -72,6 +80,7 @@ def run(path, frame_width, frame_height):
 
     while True:
 
+
         cur_time = time.time()
 
         timout = constants.FIRST_TIME_OUT
@@ -85,7 +94,8 @@ def run(path, frame_width, frame_height):
                 lets_exit = True
                 break
 
-        if lets_exit == 1:
+
+        if lets_exit == True:
             out.release()
             break
 
@@ -100,6 +110,7 @@ def run(path, frame_width, frame_height):
         files_cnt = int((segments_cnt + SPF - 1) // SPF)
 
         if check_prediction_files_exist(path_out, cur, files_cnt) == 0:
+            print("what!!!!")
             break
         
         predictions, is_anomaly = read_predictions(path_out, cur, files_cnt)
@@ -111,7 +122,6 @@ def run(path, frame_width, frame_height):
         all_seg = len(is_anomaly)         
         propis = 0
         cur_anom = 0
-
         while lets_exit == 0 and cap.isOpened():
             ret, frame = cap.read()
 
@@ -195,8 +205,11 @@ def run(path, frame_width, frame_height):
             if cnt_frm % (FPS * UPS) == 0:
                 cnt_seg += 1
 
+        cv2.destroyAllWindows()
+
 
         cap.release()
+
 
         cur += 1
     
