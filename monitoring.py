@@ -45,6 +45,7 @@ def check_prediction_files_exist(path, cur, files_cnt):
     return 1
 
 out = cv2.VideoWriter("compressed/video.mp4",cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (constants.FRAME_WIDTH,constants.FRAME_HEIGHT))
+out2 = cv2.VideoWriter("monitored/video.mp4",cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (constants.FRAME_WIDTH,constants.FRAME_HEIGHT))
 
 
 lets_exit = False
@@ -54,15 +55,17 @@ def isr(signum, frame):
     global lets_exit
     notify_user.notify("System Stopped", "my watch has ended")
     out.release()
+    out2.release()
     print("system carried away to stop")
     lets_exit = True
 
 
 def run(path, frame_width, frame_height):
-    global out, lets_exit, frame_cnt_all
+    global out, lets_exit, frame_cnt_all,out2
     notify_user.notify("System Started", "my watch began")
     signal.signal(signal.SIGALRM, isr)
     out.release()
+    out2.release()
     """
     while True:
         time.sleep(10)
@@ -73,7 +76,7 @@ def run(path, frame_width, frame_height):
 
     # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
     out = cv2.VideoWriter("compressed/" + path + ".mp4" ,cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (frame_width,frame_height))
-
+    out2 = cv2.VideoWriter("monitored/" + path + ".mp4" ,cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (frame_width,frame_height))
     
     cur = 1
     lst_clc = 0
@@ -97,6 +100,7 @@ def run(path, frame_width, frame_height):
 
         if lets_exit == True:
             out.release()
+            out2.release()
             break
 
         cap = read_video(path_vid + str(cur) + ".mp4")
@@ -180,6 +184,8 @@ def run(path, frame_width, frame_height):
                 color = color_txt,
                 thickness = constants.FONT_THICKNESS_P, 
                 lineType = cv2.LINE_AA)
+
+            out2.write(frame)
 
             cv2.putText(img = frame, 
                 text = str(frame_cnt_all),
