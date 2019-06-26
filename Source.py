@@ -39,16 +39,18 @@ FPS = constants.FPS
 UPS = constants.UPS
 SPF = constants.SPF
 
+"""
 # Remove previous videos
 os.system("rm videos/*")
 os.system("rm compressed/*")
 
 # Remove previous out
 os.system("rm -rf Anomaly-Detection/out/*")
+"""
 
 # Create a VideoCapture object
 cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-
+ 
 # Check if camera opened successfully
 if (cap.isOpened() == False): 
     print("Unable to read camera feed")
@@ -76,10 +78,12 @@ def child():
     else:
         pipeline.pipeline(path, frames_cnt)
 
+frame_cnt_all = 0
+
 # Read from Camera and Store
 id = 1
 def parent():
-    global frames_cnt, path, id
+    global frames_cnt, path, id, frame_cnt_all
     frames_cnt = 0
 
     path = global_path + str(id) + ".mp4"
@@ -95,15 +99,26 @@ def parent():
         # Write the frame
         if ret != True:
             os._exit(0)
+
+        out.write(frame)
+        frames_cnt += 1
+        frame_cnt_all += 1
+        
+        cv2.putText(img = frame, 
+            text = str(frame_cnt_all),
+            org = (constants.MARGIN_W_P, constants.MARGIN_H_P + 20), 
+            fontFace = cv2.FONT_HERSHEY_DUPLEX, 
+            fontScale = constants.FONT_SCALE_P, 
+            color = constants.NORMAL_COLOR,
+            thickness = constants.FONT_THICKNESS_P, 
+            lineType = cv2.LINE_AA)
+
         
         cv2.imshow('original', frame)
 
         # Press Q on keyboard to  exit
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
-        out.write(frame)
-        frames_cnt = frames_cnt + 1
     
         if can_break == 0:
             childProcExitInfo = os.waitpid(newpid, os.WNOHANG)

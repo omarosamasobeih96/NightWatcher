@@ -41,17 +41,18 @@ out = cv2.VideoWriter("compressed/video.mp4",cv2.VideoWriter_fourcc('M','J','P',
 
 
 lets_exit = 0
+frame_cnt_all = 0
 
 def isr(signum, frame):
     global lets_exit
-    notify_user.notify("Alarm", "system stopped working")
+    notify_user.notify("System Stopped", "my watch has ended")
     out.release()
     lets_exit = 1
 
 
 def run(path, frame_width, frame_height):
-    global out, lets_exit
-    notify_user.notify("System started", "the watch began")
+    global out, lets_exit, frame_cnt_all
+    notify_user.notify("System Started", "my watch began")
     signal.signal(signal.SIGALRM, isr)
     out.release()
     """
@@ -130,9 +131,10 @@ def run(path, frame_width, frame_height):
                     prev = is_anomaly[cnt_seg - 1]
                 if cnt_seg + 1 < len(predictions):
                     nxt = is_anomaly[cnt_seg + 1]
+                """
                 if nxt != cur1 and prev != cur1:
                     is_anomaly[cnt_seg] = prev
-
+                """
                 prnted = constants.NORMAL_TEXT
                 color_txt = constants.NORMAL_COLOR
                 propis = "Prob :  " + str(int(100 * (1 - predictions[cnt_seg]))) + "%"
@@ -144,7 +146,7 @@ def run(path, frame_width, frame_height):
             if is_anomaly[cnt_seg]:
                 if cur_anom == 0:
                     cur_anom = 1
-                    notify_user.notify("Alarm", "anomaly is detected")
+                    notify_user.notify("System Stopped", "my watch has ended")
                 if lets_exit == 0:
                     out.write(frame)
             else:
@@ -169,6 +171,16 @@ def run(path, frame_width, frame_height):
                 thickness = constants.FONT_THICKNESS_P, 
                 lineType = cv2.LINE_AA)
 
+            cv2.putText(img = frame, 
+                text = str(frame_cnt_all),
+                org = (constants.MARGIN_W_P, constants.MARGIN_H_P + 20), 
+                fontFace = cv2.FONT_HERSHEY_DUPLEX, 
+                fontScale = constants.FONT_SCALE_P, 
+                color = color_txt,
+                thickness = constants.FONT_THICKNESS_P, 
+                lineType = cv2.LINE_AA)
+                
+
             wait_time = max(0, (1/FPS) - time.time() + lst_clc - constants.ACCELERATING_MONITORING_FACTOR)
             time.sleep(wait_time)
 
@@ -179,6 +191,7 @@ def run(path, frame_width, frame_height):
             cv2.waitKey(1)
 
             cnt_frm += 1
+            frame_cnt_all += 1
             if cnt_frm % (FPS * UPS) == 0:
                 cnt_seg += 1
 

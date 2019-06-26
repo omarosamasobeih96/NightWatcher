@@ -11,7 +11,7 @@ prototxt_path = "C3D/C3D-v1.0/examples/c3d_feature_extraction/prototxt"
 
 in_list_path = "input_list_video.txt"
 out_list_path = "output_list_video_prefix.txt"
-num_vid_in_seg = 64
+num_vid_in_seg = 32
 
 in_list_path = os.path.join(prototxt_path , in_list_path)
 out_list_path = os.path.join(prototxt_path , out_list_path)

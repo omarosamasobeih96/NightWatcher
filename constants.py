@@ -1,5 +1,5 @@
 FPS = 16    # frames per second
-UPS = 2     # units per segment
+UPS = 1     # units per segment
 SPF = 32    # segments per file
 
 FRAME_WIDTH = 640
@@ -20,7 +20,7 @@ ANOMALY_COLOR = (0, 0, 255)
 NORMAL_TEXT = "Normal"
 ANOMALY_TEXT = "Anomaly"
 
-ACCELERATING_MONITORING_FACTOR = 0
+ACCELERATING_MONITORING_FACTOR = 1 / (2 * FPS)
 
-TIME_OUT_PERIOD = 5
+TIME_OUT_PERIOD = 200
 FIRST_TIME_OUT = 200
