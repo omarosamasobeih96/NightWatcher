@@ -145,10 +145,10 @@ def run(path, frame_width, frame_height):
                     prev = is_anomaly[cnt_seg - 1]
                 if cnt_seg + 1 < len(predictions):
                     nxt = is_anomaly[cnt_seg + 1]
-                """
-                if nxt != cur1 and prev != cur1:
-                    is_anomaly[cnt_seg] = prev
-                """
+                
+                if nxt and nxt != cur1 and prev != cur1:
+                    is_anomaly[cnt_seg] = nxt
+                
                 prnted = constants.NORMAL_TEXT
                 color_txt = constants.NORMAL_COLOR
                 propis = "Prob :  " + str(int(100 * (1 - predictions[cnt_seg]))) + "%"
