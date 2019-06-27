@@ -53,7 +53,7 @@ frame_cnt_all = 0
 
 def isr(signum, frame):
     global lets_exit
-    notify_user.notify("System Stopped", "my watch has ended")
+    notify_user.notify("System Stopped", "My watch has ended")
     out.release()
     out2.release()
     print("system carried away to stop")
@@ -62,7 +62,7 @@ def isr(signum, frame):
 
 def run(path, frame_width, frame_height):
     global out, lets_exit, frame_cnt_all,out2
-    notify_user.notify("System Started", "my watch began")
+    notify_user.notify("System Started", "My watch began")
     signal.signal(signal.SIGALRM, isr)
     out.release()
     out2.release()
@@ -160,7 +160,7 @@ def run(path, frame_width, frame_height):
             if is_anomaly[cnt_seg]:
                 if cur_anom == 0:
                     cur_anom = 1
-                    notify_user.notify("System Stopped", "my watch has ended")
+                    notify_user.notify("Alarm", "Anomaly Detected")
                 if lets_exit == 0:
                     out.write(frame)
             else:
