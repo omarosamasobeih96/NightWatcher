@@ -8,6 +8,7 @@ import constants
 import GUI
 import signal
 import Mode
+import notify_user
 
 source_mode = True #True = camera and False = video
 video_path = 0
@@ -27,6 +28,8 @@ def isq(signum, frame):
         source_mode = False
 
 signal.signal(signal.SIGALRM, isq)
+
+
 
 mode_pid = os.fork()
 if mode_pid == 0:
@@ -105,7 +108,7 @@ if outpid == 0:
 # Prediction
 def child():
     if frames_cnt == 0:
-	    time.sleep(5)
+	    time.sleep(0)
     else:
         pipeline.pipeline(path, frames_cnt)
 
@@ -113,8 +116,13 @@ frame_cnt_all = 0
 
 # Read from Camera and Store
 id = 1
+cont_next_time = 1
 def parent():
-    global frames_cnt, path, id, frame_cnt_all, is_running
+    global frames_cnt, path, id, frame_cnt_all, is_running, cont_next_time
+    if cont_next_time == 0:
+        is_running = 0
+        return
+
     frames_cnt = 0
 
     path = global_path + str(id) + ".mp4"
@@ -123,43 +131,55 @@ def parent():
     out = cv2.VideoWriter("videos/" + path,cv2.VideoWriter_fourcc('M','J','P','G'), FPS, (frame_width,frame_height))
     
     can_break = 0
-
+    last_frame = None
     while can_break == 0 or frames_cnt % (FPS * UPS * SPF) != 0:
         ret, frame = cap.read()
         
-        # Write the frame
-        if ret:
-            out.write(frame)
-            frames_cnt += 1
-            frame_cnt_all += 1
-            
-            cv2.putText(img = frame, 
-                text = str(frame_cnt_all),
-                org = (constants.MARGIN_W_P, constants.MARGIN_H_P + 20), 
-                fontFace = cv2.FONT_HERSHEY_DUPLEX, 
-                fontScale = constants.FONT_SCALE_P, 
-                color = constants.NORMAL_COLOR,
-                thickness = constants.FONT_THICKNESS_P, 
-                lineType = cv2.LINE_AA)
+        if can_break == 0:
+            childProcExitInfo = os.waitpid(newpid, os.WNOHANG)
+            if childProcExitInfo[0] == newpid:
+                can_break = 1
 
-            
-            cv2.imshow('original', frame)
-
-            # Press Q on keyboard to  exit
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        
-            if can_break == 0:
-                childProcExitInfo = os.waitpid(newpid, os.WNOHANG)
-                if childProcExitInfo[0] == newpid:
-                    can_break = 1
-        else:
-            if source_mode == False:
+        if ret == False:
+            if frames_cnt == 0:
                 is_running = False
                 break
+            if source_mode == False:
+                frame = last_frame
+                cont_next_time = False
+                if frames_cnt % (FPS * UPS * SPF) == 0:
+                    continue
 
+        # Write the frame
+        out.write(frame)
+        frames_cnt += 1
+        frame_cnt_all += 1
+        
+        cv2.putText(img = frame, 
+            text = str(frame_cnt_all),
+            org = (constants.MARGIN_W_P, constants.MARGIN_H_P + 20), 
+            fontFace = cv2.FONT_HERSHEY_DUPLEX, 
+            fontScale = constants.FONT_SCALE_P, 
+            color = constants.NORMAL_COLOR,
+            thickness = constants.FONT_THICKNESS_P, 
+            lineType = cv2.LINE_AA)
+
+        
+        cv2.imshow('original', frame)
+
+        # Press Q on keyboard to  exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+        if source_mode == False:
+            time.sleep(constants.ACCELERATING_MONITORING_FACTOR)
+        
+        last_frame = frame
+
+    print(frames_cnt)
     id += 1
     out.release()
+
 
 gui_running = True
 out_running = True
@@ -179,7 +199,7 @@ while is_running:
     childProcExitInfo = os.waitpid(gui_pid, os.WNOHANG)
     if childProcExitInfo[0] == gui_pid:
         is_running = False
-        gui_running = False
+        gui_running = False        
         print("gui stopped")
 
 """
@@ -212,7 +232,10 @@ while True:
     if gui_running == 0 and out_running == 0:
         break
 cap.release()
+print("Source Ended")
 quit()
+
+
 
 """
 killing_pid = os.fork()

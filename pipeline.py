@@ -10,5 +10,6 @@ def pipeline(video , len):
     os.system("sh mk1.sh")
     os.system("python convert.py")
     os.system("python run.py")
+    print("Pipeline ended")
 
 

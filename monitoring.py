@@ -82,8 +82,6 @@ def run(path, frame_width, frame_height):
     lst_clc = 0
 
     while True:
-
-
         cur_time = time.time()
 
         timout = constants.FIRST_TIME_OUT
@@ -97,8 +95,10 @@ def run(path, frame_width, frame_height):
                 lets_exit = True
                 break
 
+        print("Waiting finished")
 
         if lets_exit == True:
+            print("Let's exit")
             out.release()
             out2.release()
             break
@@ -210,12 +210,8 @@ def run(path, frame_width, frame_height):
             frame_cnt_all += 1
             if cnt_frm % (FPS * UPS) == 0:
                 cnt_seg += 1
-
-        cv2.destroyAllWindows()
-
-
         cap.release()
-
-
         cur += 1
+    cv2.destroyAllWindows()
+
     

@@ -9,7 +9,7 @@ def isr(signum, frame):
 
 
 def video():
-    fname = fd.askopenfilename(title = "Select Video",filetypes=(("Video files", "*.mp4;*.flv;*.avi;*.mkv"),
+    fname = fd.askopenfilename(title = "Select Video",filetypes=(("Video files", "*.mp4"),
                                        ("All files", "*.*") ))
     f = open("videopath.txt", "w")
     f.write(fname)
